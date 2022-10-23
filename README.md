@@ -1,47 +1,53 @@
 # SQL-Project
 
----
-
 Neste projeto da disciplina de Megadados, foi desenvolvido um **microsserviço de controle de estoque** usando o framework **FastAPI**.
 
 ## Membros da dupla
-
----
 
 - Luca Coutinho Melão
 - Matheus Kwon
 
 ## Requisitos funcionais
 
----
-Usuário pode criar produto, consultar inventário de produtos, alterar detalhes do produto, alterar quantidade de produto, remover produto do inventário.
+O usuário pode criar produto, consultar inventário de produtos, alterar detalhes do produto, alterar quantidade de produto, remover produto do inventário.
 
-- Criar Produto [POST]
+- Criar Produto **[POST]**
 
-- Consultar inventário de produtos [GET]
+- Consultar inventário de produtos completo **[GET]**
 
-- Alterar detalhes de produtos [PUT]
+- Consultar produto no inventário **[GET]**
 
-- Alterar a quantidade de produtos [PATCH]
+- Alterar detalhes de produtos **[PUT]**
 
-- Remover produtos do inventário [DELETE]
+- Alterar a quantidade de produtos **[PATCH]**
 
-## Interfaces visuais
+- Remover produtos do inventário **[DELETE]**
 
----
+## Documentação visual
 
-- Swagger UI (URL/docs)
-- ReDoc (URL/redoc)
+Acesse para testar as requisições e as funcionalidades da API e para compreender sua documentação.
 
----
-
-Ativação do environment:
+- Swagger UI (URL/docs):
 
 ```shell
-source env/bin/activate
+http://127.0.0.1:8000/docs
 ```
 
-Run app:
+- ReDoc (URL/redoc):
+
+```shell
+http://127.0.0.1:8000/redoc
+```
+
+## Comandos
+
+Infraestrutura:
+
+```shell
+pip install -r requirements.txt
+```
+
+App:
 
 ```shell
 uvicorn main:app --reload

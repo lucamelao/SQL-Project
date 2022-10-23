@@ -1,6 +1,7 @@
 from email.mime import message
-from fastapi import Body, FastAPI, status, HTTPException
+from fastapi import Body, FastAPI, status, HTTPException, Path
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from typing import Union
 
@@ -30,17 +31,35 @@ product_2 = {"name" : "XBOX Series X", "price" : 4699.99, "description" : "Black
 product_3 = {"name" : "HDMI1 Cable", "price" : 79.99, "description" : "Accessory", "quantity" : 50}
 products_inventory = {0:product_1, 1:product_2, 2:product_3}
 
+     
 # Home
-@app.get("/")
+@app.get("/", response_class=HTMLResponse, tags=["Root"])
 async def root():
-    return {"Home Page"}
+    return '''
+     <html>
+        <head>
+        <title> Home Page </title>
+        </head>
+        <body>
+            <h1> Home Page </h1>
+            <h2> Access the following routes for each request: </h2>
+            <li> http://127.0.0.1:8000/inventory/create </li>
+            <li>http://127.0.0.1:8000/inventory/check</li>
+            <li>http://127.0.0.1:8000/inventory/check/{id_product}</li>
+            <li>http://127.0.0.1:8000/inventory/update/{id_product}</li>
+            <li>http://127.0.0.1:8000/inventory/edit/{id_product}</li>
+            <li>http://127.0.0.1:8000/inventory/remove/{id_product}</li>
+            <h3>By Luca and Mat</h3>
+        </body>
+    </html>
+    '''
 
 def product_in_inventory(product_id):
     if product_id not in products_inventory.keys():
         raise HTTPException(status_code = 404, detail = "Product not found in inventory!")
 
 # Create Product [POST]
-@app.post("/inventory/create", response_model=Product)
+@app.post("/inventory/create", response_model = Product, summary= "Create a product", status_code=201, tags=["Create"])
 async def create_product(
     product: Product = Body(
         example = {
@@ -51,24 +70,25 @@ async def create_product(
         }
     )
 ):
+
     products_inventory[len(products_inventory)] = product
     return product
 
 # Check inventory [GET]
-@app.get("/inventory/check", summary="Shows all the products available in the inventory")
+@app.get("/inventory/check", summary= "Shows all the products available in the inventory", status_code=200, tags=["Consult"])
 async def check_inventory():
     return products_inventory
 
 # Check by id
-@app.get("/inventory/check/{id_product}", summary="Shows the product with the specified id")
-async def check_inventory_product(id_product: int):
+@app.get("/inventory/check/{id_product}", summary="Shows the product from the inventory with the specified id", status_code=200, tags=["Consult"])
+async def check_inventory_product(id_product: int  = Path(title="The ID of the product you want to check on inventory")):
     product_in_inventory(id_product)
     return products_inventory[id_product]
 
 # Update product details [PUT]
-@app.put("/inventory/update/{id_product}", response_model=Product)
+@app.put("/inventory/update/{id_product}", response_model=Product, status_code=200, tags=["Edit"])
 async def update_product(
-    id_product: int,
+    id_product: int = Path(title="The ID of the product you want to edit"),
     product: Product = Body(
         example = {
             "name" : "Keyboard",
@@ -83,9 +103,9 @@ async def update_product(
     return update_product_encoded
 
 # Change products quantity [PATCH]
-@app.patch("/inventory/edit/{id_product}", response_model=Product)
+@app.patch("/inventory/edit/{id_product}", response_model=Product, status_code=200, tags=["Edit"])
 async def edit_product(
-    id_product: int,
+    id_product: int = Path(title="The ID of the product you want to edit"),
     product: Product = Body(
         example = {
             "name" : "Keyboard",
@@ -103,8 +123,8 @@ async def edit_product(
     return updated_product
 
 # Remove product from inventory [DELETE]
-@app.delete("/inventory/remove/{id_product}", response_model=dict)
-async def remove_product(id_product: int):
+@app.delete("/inventory/remove/{id_product}", response_model=dict, status_code=200, tags=["Remove"])
+async def remove_product(id_product: int = Path(title="The ID of the product you want to delete")):
     product_in_inventory(id_product)
     products_inventory.pop(id_product)
     return products_inventory
