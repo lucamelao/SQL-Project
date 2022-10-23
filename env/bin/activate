@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/luca/Desktop/MegaDados/SQL-Project/env"
+VIRTUAL_ENV="/Users/matkwon/Library/CloudStorage/OneDrive-Insper-InstitudodeEnsinoePesquisa/OneDrive/6o Sem/Megadados/SQL-Project/env"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

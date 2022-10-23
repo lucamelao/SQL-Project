@@ -1,4 +1,6 @@
-#!/Users/luca/Desktop/MegaDados/SQL-Project/env/bin/python3
+#!/bin/sh
+'''exec' "/Users/matkwon/Library/CloudStorage/OneDrive-Insper-InstitudodeEnsinoePesquisa/OneDrive/6o Sem/Megadados/SQL-Project/env/bin/python3" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys
