@@ -45,7 +45,12 @@ Infraestrutura:
 
 ```shell
 pip install -r requirements.txt
+export DATABASE_URL="mysql://<user>:<password>@<server-ip>/<database>"
 ```
+- \<user> = Usuário do servidor
+- \<password> = Senha do usuário
+- \<server-ip> = Endereço IP do servidor
+- \<database> = Nome da base de dados
 
 App:
 
