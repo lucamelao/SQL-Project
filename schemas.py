@@ -40,9 +40,10 @@ class InventoryResponse(InventoryBase):
         orm_mode = True
 
 class MovementBase(BaseModel):
-    id: Union[int, None] = Field(default=1, gt=0, title="Product ID", description="The ID of the product being moved.")
-    quantity: int = Field(default=0, title="Movement quantity", description="The quantity of the product being moved.", example=20)
-    
+    id: int = Field(default=None, gt=0, title="Movement ID", description="The ID of the product movement.")
+    quantity_change: int = Field(default=0, title="Movement quantity", description="The quantity of the product being moved.", example=20)
+    id_product: int = Field(default=1, gt=0, title="Product ID", description="The ID of the product being moved.")
+
     class Config:
         # static method
         orm_mode = True

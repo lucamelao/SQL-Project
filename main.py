@@ -305,6 +305,11 @@ async def add_product(request: InventoryRequest, db: Session = Depends(get_db)):
             status_code=409,
             detail="Product already in inventory! Try to increase or decrease its quantity in movements."
         )
+    if product.quantity <= 0:
+        raise HTTPException(
+            status_code=409,
+            detail="Product quantity invalid! Expected value greater than 0."
+        )
     product = InventoryRepository.add(db, product)
     return InventoryResponse.from_orm(product)
 
@@ -346,13 +351,14 @@ async def remove_inventory(id: int, db: Session = Depends(get_db)):
 # ------------------------------------------------- MOVEMENTS -------------------------------------------------
 
 # Check movements [GET]
-@app.get("/movements/check", summary= "Shows all the products available in the inventory", status_code=200, tags=["Movements"], response_model=list[MovementResponse])
+@app.get("/movements/check", summary= "All the movements made in the inventory", status_code=200, tags=["Movements"], response_model=list[MovementResponse])
 async def check_movements(db: Session = Depends(get_db)):
     """
 
         Check the movements of the products in inventory, returns a list of the movements of products in inventory. Each movement has the following attributes:
         - **id**: product ID
-        - **quantity**: quantity available in inventory
+        - **quantity_change**: quantity change in inventory
+        - **id_product**: product ID
 
         Return example:
 
@@ -360,15 +366,18 @@ async def check_movements(db: Session = Depends(get_db)):
 
             {
                 "id": 1,
-                "quantity": 4
-            },
-            {
-                "id": 5,
-                "quantity": 6
+                "quantity_change": 24,
+                "id_product": 4
             },
             {
                 "id": 2,
-                "quantity": 90
+                "quantity_change": -14,
+                "id_product": 2
+            },
+            {
+                "id": 3,
+                "quantity_change": 9,
+                "id_product": 3
             }
         ]
 
@@ -377,52 +386,71 @@ async def check_movements(db: Session = Depends(get_db)):
     return [MovementResponse.from_orm(movement) for movement in movements]
 
 # Check by id [GET]
-@app.get("/movements/check/{id_movement}", summary="Shows the quantity of the product from the inventory with the specified id", status_code=200, tags=["Movements"], response_model=MovementResponse)
+@app.get("/movements/check/{id_movement}", summary="Movement in the inventory with the specified id", status_code=200, tags=["Movements"], response_model=MovementResponse)
 async def check_movement_by_id(id: int, db: Session = Depends(get_db)):
     """
 
-        Check a product in inventory by its ID if it exists, returns the following inventory product attributes:
-        - **id**: product ID
-        - **quantity**: quantity available in inventory
+        Check a product movement by its ID if it exists, returns the following movement attributes:
+        - **id**: movement ID
+        - **quantity_change**: quantity change in inventory
+        - **id_product**: product ID
 
         Return example:
 
         {
         
             "id": 1,
-            "quantity": 4
+            "quantity_change": 4,
+            "id_product": 2
         
         }
 
     """
-    product_in_inventory(db, id)
-    product = MovementRepository.find_by_id(db, id)
-    return MovementResponse.from_orm(product)
+    if not MovementRepository.exists_by_id(db, id):
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND, 
+            detail = "Movement does not exist!"
+            )
+    movement = MovementRepository.find_by_id(db, id)
+    return MovementResponse.from_orm(movement)
+
 
 # Create Product [POST]
-@app.post("/movements/create", response_model = MovementResponse, summary= "Add a product to inventory", status_code=201, tags=["Movements"])
-async def add_movement(request: MovementRequest, db: Session = Depends(get_db)):
+@app.post("/movements/create", response_model = InventoryResponse, summary= "Move in inventory", status_code=201, tags=["Movements"])
+async def move(request: MovementRequest, db: Session = Depends(get_db)):
     """
 
-        Add a product to inventory with the following information, if there still isn't any of it in inventory:
+        Move a product in the inventory, if the product is in inventory, returning current state of product in inventory:
         - **id**: product ID
-        - **quantity**: quantity available in inventory
+        - **quantity**: current quantity in inventory
 
         Return example:
 
         {
         
             "id": 1,
-            "quantity": 4
+            "quantity": 20
         
         }
 
     """
-    product = Movement(**request.dict())
-    if MovementRepository.exists_by_id(db, product.id):
+    movement = Movement(**request.dict())
+    if MovementRepository.exists_by_id(db, movement.id):
         raise HTTPException(
             status_code=409,
-            detail="Product already in inventory! Try to increase or decrease its quantity in movements."
+            detail="Movement ID already exists, try another ID."
         )
-    product = MovementRepository.add(db, product)
-    return MovementResponse.from_orm(product)
+    movement = MovementRepository.add(db, movement)
+    id = movement.id_product
+    product_in_inventory(db, id)
+    product = InventoryRepository.find_by_id(db, id)
+    quantity = product.quantity+movement.quantity_change
+    if quantity < 0:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Trying to move more than available! Available: {product.quantity}, tried: {movement.quantity_change}."
+        )
+    elif quantity == 0:
+        InventoryRepository.delete_by_id(db, id)
+    product = InventoryRepository.update(db, Inventory(id=id, quantity=quantity))
+    return InventoryResponse.from_orm(product)

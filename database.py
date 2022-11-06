@@ -4,6 +4,19 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, drop_database, create_database
 
+'''
+from dotenv import load_dotenv
+
+load_dotenv('.env')
+
+USER = os.getenv("USER")
+PASSWORD = os.getenv("PASSWORD")
+SERVER = os.getenv("SERVER")
+DATABASE = os.getenv("DATABASE")
+
+SQLALCHEMY_DATABASE_URL = f"mysql://{USER}:{PASSWORD}@{SERVER}/{DATABASE}"
+'''
+
 SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if database_exists(SQLALCHEMY_DATABASE_URL):

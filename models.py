@@ -30,7 +30,8 @@ class Inventory(Base):
 class Movement(Base):
     __tablename__ = "movements"
 
-    id = Column(Integer, ForeignKey("products.id"), primary_key=True, index=True)
-    quantity: int = Column(Integer, nullable=False)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    quantity_change: int = Column(Integer, nullable=False)
+    id_product = Column(Integer, ForeignKey("products.id"))
 
     products = relationship("Product", back_populates="movement")

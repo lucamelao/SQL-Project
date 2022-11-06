@@ -44,16 +44,26 @@ http://127.0.0.1:8000/redoc
 Infraestrutura:
 
 ```shell
-pip install -r requirements.txt
-export DATABASE_URL="mysql://<user>:<password>@<server-ip>/<database>"
+pip3 install -r requirements.txt
+export DATABASE_URL="mysql://{USER}:{PASSWORD}@{SERVER}/{DATABASE}"
 ```
-- \<user> = Usuário do servidor
-- \<password> = Senha do usuário
-- \<server-ip> = Endereço IP do servidor
-- \<database> = Nome da base de dados
+
+Variáveis que devem ser substituídas:
+
+- {USER} = Usuário do servidor
+- {PASSWORD} = Senha do usuário
+- {SERVER} = Endereço IP do servidor
+- {DATABASE} = Nome da base de dados
+
+Ao abrir o MySQL Workbench você deve ver {DATABASE} em schemas.
+
+Para confirmar, rode o comando abaixo:
+
+```shell
+echo $DATABASE_URL
+```
 
 App:
-
 ```shell
 uvicorn main:app --reload
 ```
